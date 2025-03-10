@@ -20,20 +20,37 @@
     <div id="imageContainer"></div>
 
     <script>
-        document.getElementById('imageUpload').addEventListener('change', function(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
-                    document.getElementById('imageContainer').innerHTML = '';
-                    document.getElementById('imageContainer').appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    </script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('imageUpload');
+            const file = fileInput.files[0];
 
+            if (!file) {
+                alert("Bitte ein Bild auswählen!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("image", file);
+
+            try {
+                const response = await fetch("http://localhost:5000/upload", {
+                    method: "POST",
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (data.imageId) {
+                    displayImage(data.imageId);
+                }
+            } catch (error) {
+                console.error("Fehler beim Hochladen:", error);
+            }
+        }
+
+        async function displayImage(imageId) {
+            const imageContainer = document.getElementById('imageContainer');
+            imageContainer.innerHTML = `<img src="http://localhost:5000/image/${imageId}" alt="Hochgeladenes Bild">`;
+        }
+    </script>
 </body>
 </html>
